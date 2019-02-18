@@ -7,7 +7,7 @@ jan12 <- filter(flights, month == 1, day == 12)
 
 #Filtering using the OR operator to flights departing in january or february
 
-Nov.dec <- filter(flights, month == 1 | month == 2)
+Jan.feb <- filter(flights, month == 1 | month == 2)
 
 #Filtering flights with arrival and departure delay less than 5 hours
 filter(flights, arr_delay <= 300, dep_delay <= 300)
@@ -153,4 +153,6 @@ delays <- flights %>%
     delay = mean(dep_delay, na.rm = TRUE)
   ) %>% 
   filter(count > 20)
+
+
 

@@ -3,11 +3,11 @@ library(tidyverse)
 #Learning the different types of read commands available in the tidyverse package
 
 gapminder <- read_csv("MS Analytics/ANLY 506/Data/gapminder.csv")
-read_csv("The first line of metadata
-         The second line of metadata
+read_csv("First line
+         Second line
          x,y,z
          1,2,3",skip=2)
-read_csv("# A comment I want to skip
+read_csv("#Commenting
          x,y,z
          1,2,3",comment="#")
 read_csv("1,2,3\n4,5,6",col_names=FALSE)
@@ -29,29 +29,33 @@ read_csv("a,b,c\n1,2\n1,2,3,4")
 read_csv("a,b\n\1")
 # As the first row or header row has 2 values, the second row needs to have 2 values or one of the observations will be NA.
 
+
+#Parsing functions including logical parsing, integer parsing, date parsing, double parsing, 
+
 str(parse_logical(c("TRUE", "FALSE", "NA")))
 
 str(parse_integer(c("1", "2", "3")))
 
-str(parse_date(c("2010-01-01", "1979-10-14")))
+str(parse_date(c("2018-07-01", "1999-03-14")))
 
-parse_integer(c("1", "231", ".", "456"), na = ".")
+parse_integer(c("1", "23144", ".", "45426"), na = ".")
 
-x <- parse_integer(c("123", "345", "abc", "123.45"))
+x <- parse_integer(c("1243", "34125", "adabc", "123.45"))
 
-parse_double("1.23")
+parse_double("3.45")
 
-parse_double("1,23", locale = locale(decimal_mark = ","))
+#parsing double with locale of decimal mark
+parse_double("3,45", locale = locale(decimal_mark = ","))
 
-parse_number("$123,456,789")
+#parsing number with $ sign
+parse_number("$451,456,564")
 
+#Parsing number with grouping marks
 parse_number("123.456.789", locale = locale(grouping_mark = "."))
 
-parse_number("123'456'789", locale = locale(grouping_mark = "'"))
+parse_number("789'123'789", locale = locale(grouping_mark = "'"))
 
-fruit <- c("apple", "banana")
-parse_factor(c("apple", "banana", "bananana"), levels = fruit)
-
+#parsing date and time functions
 parse_datetime("2010-10-01T2010")
 parse_datetime("20101010")
 parse_date("2010-10-01")
@@ -76,4 +80,5 @@ d3 <- parse_date("06-Jun-2017","%d-%b-%Y")
 d4 <- parse_date(c("August 19 (2015)", "July 1 (2015)"),"%B %d (%Y)")
 d5 <- parse_date("12/30/14","%m/%d/%y")
 t1 <- parse_time("1705","%H%M")
+
 
