@@ -1,0 +1,187 @@
+---
+title: "Week 9"
+author: "Suraj Radhakrishnan"
+date: "February 17, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Plotting functions in R
+
+In this section we will learn the various plotting functions available in R. 
+
+```{r,include=FALSE,echo=FALSE,message=FALSE}
+library(rmarkdown)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(lvplot)
+library(hexbin)
+library(yarrr)
+```
+
+
+## Measuring variation in our data
+
+In our analysis, we will first look at understanding the variation of the data using the ChickWeight dataset. This dataset contains the results of an experiment on the effect of diet on early growth of chicks. We first understand the structure of the data.
+
+```{r, echo=FALSE}
+str(ChickWeight)
+```
+
+Looking at the dataset, we observe that there are 4 levels of diet that are used on the chicks. The dataset has a total of 578 observations of 4 variables. The weight variable is used as the output variable which contains the weight of the chicks. This variable indicates the effectiveness of the diet used.
+
+###Measuring variation in categorical data using geom_bar
+The first variation that we want to understand in our data is to identify how the levels of diet are distributed across our chicks. As the diet levels are a categorical variable, we can use a bar chart.
+
+```{r}
+ggplot(data = ChickWeight) +
+  geom_bar(mapping = aes(x = Diet))
+```
+
+The height of the bars displays how many observations occurred with each diet value. You can compute these values manually with the count() function in the dplyr package.
+
+```{r}
+ChickWeight %>%
+  count(Diet)
+```
+
+### Measuring variation in continuous data using geom_histogram
+
+To attempt to understand the distribution of weights which are a continous variable, we can use a histogram.
+
+```{r}
+ggplot(data = ChickWeight) +
+  geom_histogram(mapping = aes(x = weight), binwidth = 5)
+```
+
+Looking at the plot, we understand that we have used a very narrow bin size. let us now attempt to plot the same histogram with a bin width of 25.
+
+```{r}
+ggplot(data = ChickWeight) +
+  geom_histogram(mapping = aes(x = weight), binwidth = 25)
+```
+
+This can also be computed using the cutwidth argument and the count() function.
+```{r}
+ChickWeight %>% 
+  count(cut_width(weight, 25))
+```
+
+The tallest bar as seen fromn the histogram and the results are the (37.5,62.5] bin which contains 143 observations. We can further analyze this data by filtering out outlier values and using a histogram to only analyze the core data.
+
+###Overlaying multiple histograms using geom_freqpoly
+
+We can overlay histograms using the geom_freqpoly command in R. Let us say we want to look at the distribution of weights across the different diets, we would use the following command:
+
+```{r}
+ggplot(data = ChickWeight, mapping = aes(x = weight, colour = Diet)) +
+  geom_freqpoly(binwidth = 25)
+```
+
+Looking at the plot, it is observed that diet 1 has a significantly higher number of observations than any of the other diets. This is rather unexpected as the results of an experiment are expected to be balanced. This makes the plot a little harder to read as the diet 1 results skew the plot. This can be fixed by using a density plot which we will later come to.
+
+We also notice there is a significant variation in the tail of the plot. This indicates that there are unexpected results in the chicks with higher weights. It is also obersved that as we proceed to the higher weights, there is a more even distribution between our 4 diet levels.
+
+We can proceed to analyze just this section of the plot by using the coord_cartesian argument along with ggplot. We can zoom in to the plot to only look at counts between 0 and 20.
+
+```{r}
+ggplot(data = ChickWeight, mapping = aes(x = weight, colour = Diet)) +
+  geom_freqpoly(binwidth = 25)+
+  coord_cartesian(ylim = c(0, 20))
+```
+
+
+##Measuring covariation between a categorical and continuous variable
+
+###Density plots
+In our earlier plot, we noticed that the large number of observations for diet 1 were skewing the results of our analysis. Therefore in order to overcome this drawback, we can use density plots to analyze our data. 
+
+```{r}
+ggplot(data = ChickWeight, mapping = aes(x = weight, y = ..density..)) + 
+  geom_freqpoly(mapping = aes(colour = Diet), binwidth = 25)
+```
+
+It can be observed that potentially diet 4 has the best results on the Weight of the chick. 
+
+###Box and whisker plots
+
+Another alternative display is to use box and whisker plots. 
+
+```{r}
+ggplot(data = ChickWeight, mapping = aes(x = Diet, y = weight)) +
+  geom_boxplot()
+```
+
+The box plot makes it easier to see that Diet 4 has the highest average mean weight. Box plots can be quite useful for such comparisons. We can use the reorder argument with box plots to change the order of the X axis display if we need to. 
+
+geom_boxplot also gives us the option to flip the box plots as required by using the coord_flip() argument. This could be particularly useful when we have longer variable names.
+
+```{r}
+ggplot(data = ChickWeight, mapping = aes(x = Diet, y = weight)) +
+  geom_boxplot()+coord_flip()
+```
+
+We can also plot letter value plots as an alternative to box plots using the geom_lv function.
+
+```{r}
+ggplot(data = ChickWeight, mapping = aes(x = Diet, y = weight)) +
+  geom_lv()
+```
+
+##Measuring covariation between 2 categorical variables
+
+In order to visualize the covariation between 2 categorical variables, we will use the pirates dataset from the yarrr package.
+
+```{r}
+str(pirates)
+```
+
+Let us take a look at how the classes are distributed by the manufacturer using the geomcount() function.
+
+```{r}
+ggplot(data = pirates) +
+  geom_count(mapping = aes(x = favorite.pirate, y = sword.type))
+
+```
+
+
+Another approach is using the geom_tile function.
+
+```{r}
+pirates %>% 
+  count(favorite.pirate, sword.type) %>%  
+  ggplot(mapping = aes(x = favorite.pirate, y = sword.type)) +
+    geom_tile(mapping = aes(fill = n))
+```
+
+##Measuring covariation between 2 continuous variables
+
+One of the easiest ways to measure covariation between 2 continuous variables is to draw a scatter plot.
+
+```{r}
+ggplot(data = pirates) +
+  geom_point(mapping = aes(x = weight, y = height))
+```
+
+To combat the problem of visualizing scatterplots with larger datasets we can use the alpha aesthetic:
+
+```{r}
+ggplot(data = pirates) +
+  geom_point(mapping = aes(x = weight, y = height), alpha = 1 / 10)
+```
+
+###Using geom_bin2d() and geom_hex()
+
+```{r}
+ggplot(data = pirates) +
+  geom_bin2d(mapping = aes(x = weight, y = height))
+
+ggplot(data = pirates) +
+  geom_hex(mapping = aes(x = weight, y = height))
+```
+
+ 

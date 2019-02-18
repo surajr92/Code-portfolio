@@ -1,0 +1,172 @@
+---
+title: "Week 12"
+author: "Suraj Radhakrishnan"
+date: "February 17, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#K-means Cluster Analysis
+
+In this section we will understand the use of clustering techniques to find subgroups of observations within a dataset. When we cluster observations, we want observations in the same group to be similar and observations in different groups to be dissimilar. 
+
+
+```{r,include=FALSE,echo=FALSE,message=FALSE}
+library(rmarkdown)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(lvplot)
+library(hexbin)
+library(yarrr)
+library(cluster)
+library(cluster.datasets)
+library(factoextra)
+library(gridExtra)
+```
+
+For our clustering analysis, we will use the "birth.death.rates.1966" dataset. A table with birth and death rates per 1000 persons for selected countries.
+
+Let us load the data in R and make sure there are no missing values; Even if there are any missing values, we make sure to omit them.
+
+```{r}
+data("birth.death.rates.1966")
+str(birth.death.rates.1966)
+C.Data <- birth.death.rates.1966
+C.Data <- na.omit(C.Data)
+head(C.Data)
+```
+
+Let us now scale the numeric variables in the dataset.
+
+```{r}
+C.Data$birth <- scale(C.Data$birth)
+C.Data$death <- scale(C.Data$death)
+head(C.Data)
+```
+
+
+##Clustering distance measures
+
+In compute the distance matrix in R, we use the get_dist and fviz_dist functions. These functions are contained in the factoextra R package.
+
+Using get_dist, we first compute a distance matrix between the rows of the data matrix. By default, the distance measure used is Euclidean distance. fviz_dist is then used for visualizing a distance matrix. Let us see how the code works in R.
+
+```{r}
+
+rownames(C.Data) <- C.Data$country
+C.Data$country <- NULL
+distance <- get_dist(C.Data)
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+```
+
+##K-means clustering in R
+
+We will now use the K-means clustering method to group the states. The first step is to select the number of clusters.
+
+Let us start with 2 clusters. We also use the nstart function to attempt multiple configurations. This will help identify the optimal configuration.
+
+We run the following R code and analyze the results:
+
+```{r}
+cluster2 <- kmeans(C.Data, centers = 2, nstart = 25)
+str(cluster2)
+cluster2
+```
+
+Looking at the results, we can see the cluster means for the two clusters across our 4 variables of Murder, Assault, UrbanPop and Rape. From the results, we can also identify which cluster each state gets assigned to.
+
+The results can also be viewed using the fviz_cluster function which will provide an effective visual illustration of the results of our K means clustering method.
+
+```{r}
+fviz_cluster(cluster2, data = C.Data)
+```
+
+
+We can repeat the analysis using different number of clusters and compare the plots to see the differences. here we repeat the analysis with 3, 4, 5 and 6 clusters.
+
+```{r}
+cluster3 <- kmeans(C.Data, centers = 3, nstart = 25)
+cluster4 <- kmeans(C.Data, centers = 4, nstart = 25)
+cluster5 <- kmeans(C.Data, centers = 5, nstart = 25)
+cluster6 <- kmeans(C.Data, centers = 6, nstart = 25)
+cluster7 <- kmeans(C.Data, centers = 7, nstart = 25)
+```
+
+Let us now plot to compare the variation in the results.
+```{r}
+p1 <- fviz_cluster(cluster2, geom = "point", data = C.Data) + ggtitle("k = 2")
+p2 <- fviz_cluster(cluster3, geom = "point",  data = C.Data) + ggtitle("k = 3")
+p3 <- fviz_cluster(cluster4, geom = "point",  data = C.Data) + ggtitle("k = 4")
+p4 <- fviz_cluster(cluster5, geom = "point",  data = C.Data) + ggtitle("k = 5")
+p5 <- fviz_cluster(cluster6, geom = "point",  data = C.Data) + ggtitle("k = 6")
+p6 <- fviz_cluster(cluster7, geom = "point",  data = C.Data) + ggtitle("k = 7")
+grid.arrange(p1, p2, p3, p4,p5,p6, nrow = 3)
+```
+
+##Determining the optimal number of clusters
+While the above graphs help us to compare the variation in the clustering results for different numbers of clusters, it does not help us identify the optimal number of clusters. There are several methods to do this.
+
+###Elbow method
+
+Elbow method can be implemented in R using 2 different methods. The first method involves manual computation of each step.
+
+We can also compute this using the fviz_nbclust function.
+
+```{r}
+set.seed(123)
+
+fviz_nbclust(C.Data, kmeans, method = "wss")
+```
+
+This method indicates that the optimal number of clusters is 3 as evidenced by the bend in the elbow.
+
+###Average Silhouette method
+
+Average silhouette method, similar to the Elbow method also has 2 methods of calculation. the first method is manual calculation. 
+
+The same can also be accomplished using the average silhouette method:
+
+```{r}
+fviz_nbclust(C.Data, kmeans, method = "silhouette")
+```
+
+This method also indicates that the optimal number of clusters is 3 similar to the elbow method.
+
+###Gap statistic method
+
+We can compute this using the clusGap function which provides the gap statistic and a standard error for the output.
+
+```{r}
+# compute gap statistic
+set.seed(123)
+gap_stat <- clusGap(C.Data, FUN = kmeans, nstart = 25,
+                    K.max = 10, B = 50)
+# Print the result
+print(gap_stat, method = "firstmax")
+
+fviz_gap_stat(gap_stat)
+```
+
+This method suggests that 1 cluster will be optimal followed by 3 clusters.
+
+##Final cluster analysis
+
+As most of the methods suggeested 3 as the most oprimal number of clusters, we perform the final analysis:
+
+```{r}
+set.seed(123)
+final <- kmeans(C.Data, 3, nstart = 25)
+print(final)
+```
+
+We visualize the results using fviz_cluster function.
+
+```{r,echo=FALSE}
+fviz_cluster(final, data = C.Data)
+```
+
+
