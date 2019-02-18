@@ -175,6 +175,7 @@ ggplot(data = pirates) +
 ```
 
 ###Using geom_bin2d() and geom_hex()
+These 2 functions are used to given a further dimension to scatter plots.
 
 ```{r}
 ggplot(data = pirates) +
