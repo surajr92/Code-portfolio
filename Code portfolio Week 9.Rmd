@@ -42,7 +42,7 @@ ggplot(data = ChickWeight) +
   geom_bar(mapping = aes(x = Diet))
 ```
 
-The height of the bars displays how many observations occurred with each diet value. You can compute these values manually with the count() function in the dplyr package.
+The height of the bars displays how many observations occurred with each diet value. From the results, it is observed that diet 1 has singificantly higher observations than the other 3 diets. You can compute these values manually with the count() function in the dplyr package.
 
 ```{r}
 ChickWeight %>%
