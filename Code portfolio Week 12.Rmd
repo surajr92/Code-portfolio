@@ -51,7 +51,7 @@ head(C.Data)
 
 ##Clustering distance measures
 
-In compute the distance matrix in R, we use the get_dist and fviz_dist functions. These functions are contained in the factoextra R package.
+To compute the distance matrix in R, we use the get_dist and fviz_dist functions. These functions are contained in the factoextra R package.
 
 Using get_dist, we first compute a distance matrix between the rows of the data matrix. By default, the distance measure used is Euclidean distance. fviz_dist is then used for visualizing a distance matrix. Let us see how the code works in R.
 
@@ -65,9 +65,9 @@ fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4
 
 ##K-means clustering in R
 
-We will now use the K-means clustering method to group the states. The first step is to select the number of clusters.
+We will now use the K-means clustering method to group the countries. The first step is to select the number of clusters.
 
-Let us start with 2 clusters. We also use the nstart function to attempt multiple configurations. This will help identify the optimal configuration.
+Let us start with 2 clusters. We also use the nstart function to attempt multiple configurations. This will help identify the optimal configuration. We start with using 25 configurations.
 
 We run the following R code and analyze the results:
 
@@ -77,7 +77,7 @@ str(cluster2)
 cluster2
 ```
 
-Looking at the results, we can see the cluster means for the two clusters across our 4 variables of Murder, Assault, UrbanPop and Rape. From the results, we can also identify which cluster each state gets assigned to.
+Looking at the results, we can see the cluster means for the two clusters across our 2 variables of birth rate and death rate. From the results, we can also identify which cluster each country gets assigned to.
 
 The results can also be viewed using the fviz_cluster function which will provide an effective visual illustration of the results of our K means clustering method.
 
@@ -86,7 +86,7 @@ fviz_cluster(cluster2, data = C.Data)
 ```
 
 
-We can repeat the analysis using different number of clusters and compare the plots to see the differences. here we repeat the analysis with 3, 4, 5 and 6 clusters.
+We can repeat the analysis using different number of clusters and compare the plots to see the differences. here we repeat the analysis with 3, 4, 5, 6 and 7 clusters.
 
 ```{r}
 cluster3 <- kmeans(C.Data, centers = 3, nstart = 25)
@@ -114,7 +114,7 @@ While the above graphs help us to compare the variation in the clustering result
 
 Elbow method can be implemented in R using 2 different methods. The first method involves manual computation of each step.
 
-We can also compute this using the fviz_nbclust function.
+We can also compute this using the fviz_nbclust function as shown below:
 
 ```{r}
 set.seed(123)
@@ -126,9 +126,9 @@ This method indicates that the optimal number of clusters is 3 as evidenced by t
 
 ###Average Silhouette method
 
-Average silhouette method, similar to the Elbow method also has 2 methods of calculation. the first method is manual calculation. 
+Average silhouette method, similar to the Elbow method also has 2 methods of calculation. The first method is manual calculation. 
 
-The same can also be accomplished using the average silhouette method:
+The same can also be accomplished using the average silhouette method shown below:
 
 ```{r}
 fviz_nbclust(C.Data, kmeans, method = "silhouette")
@@ -138,7 +138,7 @@ This method also indicates that the optimal number of clusters is 3 similar to t
 
 ###Gap statistic method
 
-We can compute this using the clusGap function which provides the gap statistic and a standard error for the output.
+We can compute this using the clusGap function which provides the gap statistic and a standard error for the output. R code is shown below:
 
 ```{r}
 # compute gap statistic
@@ -155,7 +155,7 @@ This method suggests that 1 cluster will be optimal followed by 3 clusters.
 
 ##Final cluster analysis
 
-As most of the methods suggeested 3 as the most oprimal number of clusters, we perform the final analysis:
+As most of the methods suggeested 3 as the most optimal number of clusters, we perform the final analysis:
 
 ```{r}
 set.seed(123)
@@ -168,5 +168,6 @@ We visualize the results using fviz_cluster function.
 ```{r,echo=FALSE}
 fviz_cluster(final, data = C.Data)
 ```
+
 
 
